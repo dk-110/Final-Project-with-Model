@@ -1,0 +1,92 @@
+---
+title: "Cancer Prediction Model"
+author: "DK"
+format: html
+execute:
+ echo: False
+---
+
+```{r}
+#| message: false
+#| warning: false
+
+# Step 1 Load the Libraries
+library(tidyverse)
+library(readr)     # For reading CSV
+library(dplyr)     # For data manipulation
+library(skimr)     # For data summaries
+library(ggplot2)   # Optional: for future visualizations
+library(forcats)
+library(lubridate)
+library(survminer)
+```
+
+```{r}
+# Step 2: Read the CSV file
+cancer_data <- read_csv("cancer_patients_china.csv")
+```
+
+
+```{r}
+# Step 3 Clean the Data
+
+# 1: View % missing in each column
+missing_percent <- colMeans(is.na(cancer_data)) * 100
+print(round(missing_percent, 2))
+
+# 2: Drop columns with >40% missing, except Surgery_Date and Survival_Months
+columns_to_keep <- names(missing_percent[missing_percent <= 40 | 
+                                         names(missing_percent) %in% c("Surgery_Date", "Survival_Months")])
+cancer_data_clean <- cancer_data %>%
+  select(all_of(columns_to_keep))
+
+# 3: Replace text entries like "unknown", "none", "" with NA in Surgery_Date
+cancer_data_clean <- cancer_data_clean %>%
+  mutate(
+    Surgery_Date = na_if(Surgery_Date, "unknown"),
+    Surgery_Date = na_if(Surgery_Date, "none"),
+    Surgery_Date = na_if(Surgery_Date, ""),
+    Surgery_Date = parse_date_time(Surgery_Date, orders = c("ymd", "dmy", "mdy"))
+  )
+
+# 4: Convert Diagnosis_Date too, safely
+cancer_data_clean <- cancer_data_clean %>%
+  mutate(
+    Diagnosis_Date = parse_date_time(Diagnosis_Date, orders = c("ymd", "dmy", "mdy"))
+  )
+
+# 5: Check missing values in survival columns
+cat("Missing values in Survival_Months:\n")
+print(sum(is.na(cancer_data_clean$Survival_Months)))
+
+cat("Missing values in Surgery_Date:\n")
+print(sum(is.na(cancer_data_clean$Surgery_Date)))
+
+# Optional: View structure
+glimpse(cancer_data_clean)
+
+x <- cancer_data_clean
+```
+
+
+```{r}
+# Step 4 Saving the clean data file
+write.csv(cancer_data_clean, "cancer_data_cleaned_version.csv", row.names = FALSE)
+```
+
+Still working on the following code
+
+```{r}
+# Step 1: Create a numeric variable for Survival_Status
+cancer_data_clean$Survival_Status_numeric <- ifelse(cancer_data_clean$Survival_Status == "Alive", 1, 0)
+
+# Step 2: Fit the logistics regression model
+model_logit <- glm(Survival_Status_numeric ~ Cancer_Type + Stage_at_Diagnosis + Age + Gender, 
+                   data = cancer_data_clean, family = "binomial")
+
+
+
+# Step 3: View the model summary
+summary(model_logit)
+
+```
