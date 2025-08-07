@@ -1,0 +1,16 @@
+---
+title: "About"
+page-layout: article
+format: html
+---
+
+Hi! I'm Darakhshan Fatima, and I love science and oncology. I chose to explore survival analysis as part of my journey into understanding complex biological and clinical data particularly in the context of cancer research. 
+
+---
+
+**Contact**
+
+📧 darakhshan.fatima110@gmail.com  
+🐙 [GitHub: dk-110](https://github.com/dk-110)  
+📁 [Project Repository: FINAL PROJECT WITH MODEL](https://github.com/dk-110/Final-Project-with-Model.git  
+🎓 [Course Homepage: Kane's Free Data Science Bootcamp](https://bootcamp.davidkane.info/)
