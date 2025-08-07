@@ -1,0 +1,123 @@
+---
+title: "Cancer Prediction Model"
+author: "DK"
+format: html
+execute:
+ echo: False
+---
+
+```{r}
+#| message: false
+#| warning: false
+
+# Step 1 Load the Libraries
+library(tidyverse)
+library(readr)     # For reading CSV
+library(dplyr)     # For data manipulation
+library(skimr)     # For data summaries
+library(ggplot2)   # Optional: for future visualizations
+library(forcats)
+library(lubridate)
+library(survminer)
+library(broom)
+library(gt)
+library(stargazer)
+```
+
+```{r}
+# Load your dataset
+cancer_data_clean <- read_csv("cancer_data_cleaned_version.csv")
+
+# View the first few rows
+glimpse(cancer_data_clean)
+```
+
+Can we build a model to predict recurrence using clinical and demographic variables?
+
+
+```{r}
+# Convert Recurrence_Status to binary if it's not already
+cancer_data_clean$Recurrence_Status <- as.factor(cancer_data_clean$Recurrence_Status)
+
+cancer_data_clean$Biomarker_1 <- factor(cancer_data_clean$Biomarker_1, levels = c("Negative", "Positive"))
+cancer_data_clean$Biomarker_2 <- factor(cancer_data_clean$Biomarker_2, levels = c("Low", "Medium", "High"))
+
+
+# Fit logistic regression model
+log_model <- glm(Recurrence_Status ~ Age + Stage_at_Diagnosis + Treatment_Types + 
+                   Biomarker_1 + Biomarker_2,
+                 data = cancer_data_clean,
+                 family = binomial)
+
+# Summary
+summary(log_model)
+```
+
+
+```{r}
+# Generate LaTeX
+stargazer(log_model, type = "latex", title = "Logistic Regression for Recurrence",
+          dep.var.labels = "Recurrence Status",
+          covariate.labels = c("Age", "Stage at Diagnosis", "Treatment Types", 
+                               "Biomarker 1", "Biomarker 2"),
+          out = "model_output.tex")
+```
+
+
+```{r}
+# Set seed for reproducibility
+set.seed(123)
+
+n <- 100  # number of samples
+
+# Simulate Biomarker_1 based on observed probabilities
+prob_b1 <- prop.table(table(cancer_data_clean$Biomarker_1))
+sim_biomarker_1 <- sample(names(prob_b1), size = n, replace = TRUE, prob = prob_b1)
+
+# Simulate Biomarker_2 based on observed probabilities
+prob_b2 <- prop.table(table(cancer_data_clean$Biomarker_2))
+sim_biomarker_2 <- sample(names(prob_b2), size = n, replace = TRUE, prob = prob_b2)
+
+# Create simulated dataframe
+sim_data <- data.frame(
+  Biomarker_1 = factor(sim_biomarker_1, levels = c("Negative", "Positive")),
+  Biomarker_2 = factor(sim_biomarker_2, levels = c("Low", "Medium", "High"))
+)
+
+```
+
+
+```{r}
+log_model <- glm(Recurrence_Status ~ Biomarker_1 + Biomarker_2, data = cancer_data_clean, family = binomial)
+
+```
+
+
+```{r}
+# Predict recurrence probabilities
+sim_data$linear_predictor <- predict(log_model, newdata = sim_data, type = "link")
+sim_data$recurrence_prob <- plogis(sim_data$linear_predictor)
+
+# Simulate binary outcome
+sim_data$Recurrence_Status <- rbinom(n, 1, sim_data$recurrence_prob)
+
+```
+
+
+```{r}
+# Simulated cancer rates per state
+set.seed(123)
+states_data <- map_data("state") %>%
+  left_join(data.frame(region = tolower(state.name),
+                       cancer_rate = sample(50:200, 50, replace = TRUE)), by = "region")
+
+ggplot(states_data, aes(long, lat, group = group, fill = cancer_rate)) +
+  geom_polygon(color = "white") +
+  scale_fill_viridis_c(option = "plasma") +
+  coord_fixed(1.3) +
+  labs(title = "Simulated Cancer Rates by US State",
+       subtitle = "Random data for visualization",
+       fill = "Cancer Rate",
+       caption = "Source: Simulated for illustration") +
+  theme_void()
+```
