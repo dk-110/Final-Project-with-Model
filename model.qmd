@@ -1,0 +1,51 @@
+---
+format: html
+execute: 
+  echo: false
+---
+
+## 🧠 **Predictive Model Structure (Mathematical Form)**
+
+Since we're predicting a binary outcome (`Survival_Status`), a **logistic regression model** is appropriate.
+
+Let’s define the **model mathematically**:
+$$
+\text{logit}(P(Y = 1)) = \beta_0 + \beta_1 \cdot \text{Age} + \beta_2 \cdot \text{Gender} + \beta_3 \cdot \text{CancerType} + \beta_4 \cdot \text{Stage} + \beta_5 \cdot \text{DiagnosisTime}
+$$ 
+
+
+**Where:**
+
+- \( Y = 1 \) if the patient is **Deceased**, \( Y = 0 \) otherwise  
+- **logit(p)** is the **log-odds function**: log(p/1-p)  
+- **Age** is a continuous numerical variable  
+- **Gender**, **Cancer_Type**, and **Stage_at_Diagnosis** are **categorical variables**, internally converted to dummy variables by R  
+- **Diagnosis_Date** represents the **date of diagnosis**, which may need to be transformed into a numeric format (e.g., years since 2010)
+
+```{r}
+#| warning: FALSE
+#| echo: false
+#| message: FALSE
+library(readr)
+library(dplyr)
+library(broom)
+library(kableExtra)
+# Load your dataset
+cancer_data_clean <- read_csv("cancer_data_cleaned_version.csv")
+model_survival <- glm(Survival_Status == "Deceased" ~ Age + Gender + Cancer_Type +
+                      Stage_at_Diagnosis + Diagnosis_Date, data = cancer_data_clean, family = binomial)
+```
+
+```{r}
+tidy_survival <- tidy(model_survival, conf.int = TRUE)
+```
+
+```{r}
+tidy_survival %>%
+  select(term, estimate, conf.low, conf.high) %>%
+  kable(caption = "Model Estimates with Confidence Intervals") %>%
+  kable_styling()
+```
+
+
+

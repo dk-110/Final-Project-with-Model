@@ -6,9 +6,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="DK">
 
-<title>Cancer Prediction Model – Survival Analysis of Acute Myeloid Leukemia (AML) Patients by Treatment Outcome</title>
+<title>model – Survival Analysis of Acute Myeloid Leukemia (AML) Patients by Treatment Outcome</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -68,7 +67,40 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
 
+<link href="site_libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -90,11 +122,11 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="./index.html" aria-current="page"> 
+    <a class="nav-link" href="./index.html"> 
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./model.html"> 
+    <a class="nav-link active" href="./model.html" aria-current="page"> 
 <span class="menu-text">Model</span></a>
   </li>  
   <li class="nav-item">
@@ -118,127 +150,127 @@ ul.task-list li input[type="checkbox"] {
 <!-- margin-sidebar -->
     
 <!-- main -->
-<main class="content" id="quarto-document-content">
-
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">Cancer Prediction Model</h1>
-</div>
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
 
 
 
-<div class="quarto-title-meta">
 
-    <div>
-    <div class="quarto-title-meta-heading">Author</div>
-    <div class="quarto-title-meta-contents">
-             <p>DK </p>
-          </div>
-  </div>
-    
-  
-    
-  </div>
-  
-
-
-</header>
-
-
+<section id="predictive-model-structure-mathematical-form" class="level2">
+<h2 class="anchored" data-anchor-id="predictive-model-structure-mathematical-form">🧠 <strong>Predictive Model Structure (Mathematical Form)</strong></h2>
+<p>Since we’re predicting a binary outcome (<code>Survival_Status</code>), a <strong>logistic regression model</strong> is appropriate.</p>
+<p>Let’s define the <strong>model mathematically</strong>: <span class="math display">\[
+\text{logit}(P(Y = 1)) = \beta_0 + \beta_1 \cdot \text{Age} + \beta_2 \cdot \text{Gender} + \beta_3 \cdot \text{CancerType} + \beta_4 \cdot \text{Stage} + \beta_5 \cdot \text{DiagnosisTime}
+\]</span></p>
+<p><strong>Where:</strong></p>
+<ul>
+<li>( Y = 1 ) if the patient is <strong>Deceased</strong>, ( Y = 0 ) otherwise<br>
+</li>
+<li><strong>logit(p)</strong> is the <strong>log-odds function</strong>: log(p/1-p)<br>
+</li>
+<li><strong>Age</strong> is a continuous numerical variable<br>
+</li>
+<li><strong>Gender</strong>, <strong>Cancer_Type</strong>, and <strong>Stage_at_Diagnosis</strong> are <strong>categorical variables</strong>, internally converted to dummy variables by R<br>
+</li>
+<li><strong>Diagnosis_Date</strong> represents the <strong>date of diagnosis</strong>, which may need to be transformed into a numeric format (e.g., years since 2010)</li>
+</ul>
 <div class="cell">
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package 'survminer' was built under R version 4.5.1</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loading required package: ggplot2</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loading required package: ggpubr</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package 'ggpubr' was built under R version 4.5.1</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>
-Attaching package: 'survminer'</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following object is masked from 'package:survival':
-
-    myeloma</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package 'readr' was built under R version 4.5.1</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Rows: 10000 Columns: 29</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (22): Patient_ID, Gender, Province, Urban_Rural, Ethnicity, Occupation,...
-dbl   (5): Age, Tumor_Size, Radiation_Sessions, Survival_Months, BMI
-date  (2): Diagnosis_Date, Surgery_Date
-
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-</div>
 <div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
+<table class="table caption-top table-sm table-striped small" data-quarto-postprocess="true">
+<caption>Model Estimates with Confidence Intervals</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">term</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">estimate</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">conf.low</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">conf.high</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">(Intercept)</td>
+<td style="text-align: right;">-0.3618279</td>
+<td style="text-align: right;">-0.8705577</td>
+<td style="text-align: right;">0.1465768</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Age</td>
+<td style="text-align: right;">-0.0001728</td>
+<td style="text-align: right;">-0.0022463</td>
+<td style="text-align: right;">0.0019001</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">GenderMale</td>
+<td style="text-align: right;">0.0219955</td>
+<td style="text-align: right;">-0.0728091</td>
+<td style="text-align: right;">0.1168090</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Cancer_TypeCervical</td>
+<td style="text-align: right;">-0.0949018</td>
+<td style="text-align: right;">-0.2635105</td>
+<td style="text-align: right;">0.0736925</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Cancer_TypeColorectal</td>
+<td style="text-align: right;">-0.0279658</td>
+<td style="text-align: right;">-0.1730271</td>
+<td style="text-align: right;">0.1171142</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Cancer_TypeEsophageal</td>
+<td style="text-align: right;">-0.0163695</td>
+<td style="text-align: right;">-0.1629075</td>
+<td style="text-align: right;">0.1302127</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Cancer_TypeLiver</td>
+<td style="text-align: right;">-0.1076182</td>
+<td style="text-align: right;">-0.2527765</td>
+<td style="text-align: right;">0.0374890</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Cancer_TypeLung</td>
+<td style="text-align: right;">-0.0432681</td>
+<td style="text-align: right;">-0.1937224</td>
+<td style="text-align: right;">0.1071677</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Cancer_TypeStomach</td>
+<td style="text-align: right;">-0.1282789</td>
+<td style="text-align: right;">-0.2729978</td>
+<td style="text-align: right;">0.0163607</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Stage_at_DiagnosisII</td>
+<td style="text-align: right;">-0.0778328</td>
+<td style="text-align: right;">-0.1932518</td>
+<td style="text-align: right;">0.0377111</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Stage_at_DiagnosisIII</td>
+<td style="text-align: right;">1.0379601</td>
+<td style="text-align: right;">0.9219611</td>
+<td style="text-align: right;">1.1545025</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Stage_at_DiagnosisIV</td>
+<td style="text-align: right;">1.0694418</td>
+<td style="text-align: right;">0.9414950</td>
+<td style="text-align: right;">1.1981206</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Diagnosis_Date</td>
+<td style="text-align: right;">0.0000012</td>
+<td style="text-align: right;">-0.0000265</td>
+<td style="text-align: right;">0.0000288</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
-</div>
-<div class="cell">
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package 'gganimate' was built under R version 4.5.1</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Rows: 10000 Columns: 29
-── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (22): Patient_ID, Gender, Province, Urban_Rural, Ethnicity, Occupation,...
-dbl   (5): Age, Tumor_Size, Radiation_Sessions, Survival_Months, BMI
-date  (2): Diagnosis_Date, Surgery_Date
 
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="cell-output cell-output-stderr">
-<pre><code>Rows: 10000 Columns: 29
-── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (22): Patient_ID, Gender, Province, Urban_Rural, Ethnicity, Occupation,...
-dbl   (5): Age, Tumor_Size, Radiation_Sessions, Survival_Months, BMI
-date  (2): Diagnosis_Date, Surgery_Date
 
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
-ℹ Please use `linewidth` instead.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>`geom_path()`: Each group consists of only one observation.
-ℹ Do you need to adjust the group aesthetic?
-`geom_path()`: Each group consists of only one observation.
-ℹ Do you need to adjust the group aesthetic?</code></pre>
-</div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-3-1.gif" class="img-fluid figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-
-
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
